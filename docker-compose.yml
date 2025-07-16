@@ -88,6 +88,15 @@ services:
       - "traefik.http.routers.grafana.rule=Host(`grafana.cloudsession.cloud`)"
       - "traefik.http.routers.grafana.entrypoints=web"
 
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.8.1
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave
+
 volumes:
   traefik_logs:
   grafana_data:
