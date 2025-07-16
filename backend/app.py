@@ -11,7 +11,7 @@ trace.set_tracer_provider(TracerProvider())
 tracer = trace.get_tracer(__name__)
 
 # Set up OTLP exporter
-otlp_exporter = OTLPSpanExporter(endpoint="otel-collector:4317")
+otlp_exporter = OTLPSpanExporter(endpoint="http://otel-collector:4317")
 span_processor = BatchExportSpanProcessor(otlp_exporter)
 trace.get_tracer_provider().add_span_processor(span_processor)
 

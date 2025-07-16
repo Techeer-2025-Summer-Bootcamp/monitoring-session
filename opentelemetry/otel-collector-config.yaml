@@ -1,8 +1,8 @@
 receivers:
   otlp:
     protocols:
-      grpc:
-      http:
+      grpc: 0.0.0.0:4317
+      http: 0.0.0.0:55681
 
 exporters:
   otlp:
