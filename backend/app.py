@@ -8,7 +8,7 @@ import time
 
 # Initialize OpenTelemetry
 trace.set_tracer_provider(TracerProvider())
-tracer = trace.get_tracer(__name__)
+tracer = trace.get_tracer("fastapi")
 
 # Set up OTLP exporter
 otlp_exporter = OTLPSpanExporter(endpoint="http://otel-collector:4317")
