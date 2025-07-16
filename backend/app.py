@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from opentelemetry.sdk.trace import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 import time
@@ -12,7 +12,7 @@ tracer = trace.get_tracer(__name__)
 
 # Set up OTLP exporter
 otlp_exporter = OTLPSpanExporter(endpoint="http://otel-collector:4317")
-span_processor = BatchExportSpanProcessor(otlp_exporter)
+span_processor = BatchSpanProcessor(otlp_exporter)
 trace.get_tracer_provider().add_span_processor(span_processor)
 
 # Initialize FastAPI app
