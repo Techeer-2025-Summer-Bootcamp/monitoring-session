@@ -46,7 +46,7 @@ services:
       - "traefik_logs:/traefik/logs/"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.cloudsession.cloud`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.services.dashboard.loadbalancer.server.port=8090"
       - "traefik.http.routers.dashboard.entrypoints=web"
@@ -63,7 +63,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.fastapi.loadbalancer.server.port=8000"
-      - "traefik.http.routers.fastapi.rule=Host(`fastapi.localhost`)"
+      - "traefik.http.routers.fastapi.rule=Host(`fastapi.cloudsession.cloud`)"
       - "traefik.http.routers.fastapi.entrypoints=web"
 
 volumes:
