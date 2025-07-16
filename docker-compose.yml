@@ -9,7 +9,7 @@ services:
       - "--entryPoints.dashboard.address=:8090"
       - "--log.level=DEBUG"
       - "--accesslog=true"
-      - "--accesslog.filepath=/traefik/logs/access.log"
+      # - "--accesslog.filepath=/traefik/logs/access.log"
       - "--accesslog.bufferingsize=100"
       - "--accesslog.format=json"
       - "--accesslog.fields.defaultmode=keep"
@@ -50,6 +50,7 @@ services:
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.services.dashboard.loadbalancer.server.port=8090"
       - "traefik.http.routers.dashboard.entrypoints=web"
+      - "logging=promtail"
 
   fastapi:
     build:
@@ -87,6 +88,7 @@ services:
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "traefik.http.routers.grafana.rule=Host(`grafana.cloudsession.cloud`)"
       - "traefik.http.routers.grafana.entrypoints=web"
+      - "logging=promtail"
 
   node-exporter:
     image: quay.io/prometheus/node-exporter:v1.8.1
@@ -119,6 +121,23 @@ services:
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
       - "traefik.http.routers.portainer.rule=Host(`portainer.cloudsession.cloud`)"
       - "traefik.http.routers.portainer.entrypoints=web"
+
+  
+  promtail:
+    image: grafana/promtail:latest
+    ports:
+      - "9080:9080"
+    volumes:
+      - ./promtail/promtail.yml:/etc/promtail/promtail.yml
+    command:
+      - '--config.file=/etc/promtail/promtail.yml'
+  
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command:
+      - '--config.file=/etc/loki/local-config.yaml'
 
 volumes:
   traefik_logs:
