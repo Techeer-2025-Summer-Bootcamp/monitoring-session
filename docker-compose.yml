@@ -1,0 +1,70 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true" 
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entryPoints.dashboard.address=:8090"
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/traefik/logs/access.log"
+      - "--accesslog.bufferingsize=100"
+      - "--accesslog.format=json"
+      - "--accesslog.fields.defaultmode=keep"
+      - "--accesslog.fields.headers.defaultmode=keep"
+      - "--accesslog.fields.headers.names.X-Forwarded-For=keep"
+      - "--api.dashboard=true"
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.buckets=0.100000, 0.300000, 1.200000, 5.000000"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--entryPoints.metrics.address=:8091"
+      - "--metrics.prometheus.entryPoint=metrics"
+      # - "--tracing=true"
+      # - "--tracing.otlp=true"
+      # - "--tracing.otlp.grpc.insecure=true"
+      # - "--tracing.otlp.grpc.endpoint=localhost:4317"
+      # - "--tracing.serviceName=traefik"
+      # - "--tracing.sampleRate=1.0"
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 8090
+        published: 8090
+        protocol: tcp
+        mode: host
+      - target: 8091
+        published: 8091
+        protocol: tcp
+        mode: host
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "traefik_logs:/traefik/logs/"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8090"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+
+  fastapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.fastapi.loadbalancer.server.port=8000"
+      - "traefik.http.routers.fastapi.rule=Host(`fastapi.localhost`)"
+      - "traefik.http.routers.fastapi.entrypoints=web"
+
+volumes:
+  traefik_logs:
