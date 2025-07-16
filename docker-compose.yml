@@ -9,7 +9,7 @@ services:
       - "--entryPoints.dashboard.address=:8090"
       - "--log.level=DEBUG"
       - "--accesslog=true"
-      # - "--accesslog.filepath=/traefik/logs/access.log"
+      - "--accesslog.filepath=/traefik/logs/access.log"
       - "--accesslog.bufferingsize=100"
       - "--accesslog.format=json"
       - "--accesslog.fields.defaultmode=keep"
@@ -139,8 +139,54 @@ services:
       - "3100:3100"
     command:
       - '--config.file=/etc/loki/local-config.yaml'
+  
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.26
+    volumes:
+      - ./beat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - traefik_logs:/traefik/logs/
+  
+  elasticsearch:
+    image: elasticsearch:7.17.26
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data/
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    environment:
+      - discovery.type=single-node
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - xpack.security.enabled=false
+      - xpack.monitoring.enabled=false
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+    
+  logstash:
+    image: logstash:7.17.26
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ls_data:/usr/share/logstash/data
+  
+  kibana:
+    image: kibana:7.17.26
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - kb_data:/usr/share/kibana/data
 
 volumes:
   traefik_logs:
   grafana_data:
   portainer_data:
+  es_data:
+  ls_data:
+  kb_data:
